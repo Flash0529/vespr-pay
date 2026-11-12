@@ -26,7 +26,9 @@ In the chat type `@coder pay $25 for the logo invoice`, press **Approve $25.00**
 
 **Sandbox access.** Create your own for free at developer.paypal.com: *Apps & Credentials*, switch to Sandbox, *Create App* gives the client id and secret; *Testing Tools, Sandbox Accounts* gives a Personal account whose email and password you use as the buyer on PayPal's page. Judges who prefer not to create accounts can ask us for a sandbox test login through the Devpost page. **No keys are in this repository**: the server reads yours from its environment, and without them the feature says "PayPal sandbox is not set up on this server" and nothing pretends to work.
 
-- **Real VS Code in the browser** (Code - OSS), so your extensions, themes and settings work.
+## What VESPR is
+
+- **Real VS Code in the browser** (Code - OSS) in the Docker quickstart, so your extensions, themes and settings work. The ten-minute PayPal path above opens the app's own editor instead.
 - **Everyone has a cursor.** People and agents show up live in the file, with names, like a shared document.
 - **Agents are teammates.** They edit, run commands and review alongside you; every chat with an agent is visible to the whole workspace, and the agent asks the room before it acts (five permission modes; the first answer on an Approve / Deny card decides and everyone sees who).
 - **Who wrote this, and why.** Every character records the author, the model and the request behind it, shown on hover; session replay scrubs back through edits, cursors, chat and approvals.

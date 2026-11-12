@@ -42,7 +42,7 @@ States: `pending` (waiting for a person) → `awaiting_buyer` (approved, PayPal 
 
 ## The payments ledger
 
-Tools menu, **Payments** (the grid icon): every payment request in the room as a table (time, who asked, what, amount, status, who decided, PayPal order id). Sort by any column, filter under each heading, search across all of them, export CSV, and open a row for its receipt: the agent's reason, the server's own numbers, the PayPal ids and every step with who did it. It is [AG Grid Community](https://www.ag-grid.com/) (MIT), vendored unchanged in `app/vendor/` with its licence recorded in `app/vendor/LICENSES.txt` and `THIRD-PARTY.md`; it is loaded from the app's own folder, so it works offline. The rows are the server's own list (`GET /api/pay/<room>`), not a copy kept in the browser.
+The sidebar's **Payments** row, or the Tools menu, **Payments** (the grid icon): every payment request in the room as a table (time, who asked, what, amount, status, who decided, PayPal order id). Sort by any column, filter under each heading, search across all of them, export CSV, and open a row for its receipt: the agent's reason, the server's own numbers, the PayPal ids and every step with who did it. It is [AG Grid Community](https://www.ag-grid.com/) (MIT), vendored unchanged in `app/vendor/` with its licence recorded in `app/vendor/LICENSES.txt` and `THIRD-PARTY.md`; it is loaded from the app's own folder, so it works offline. The rows are the server's own list (`GET /api/pay/<room>`), not a copy kept in the browser.
 
 ## In a classroom or a team
 
@@ -124,7 +124,7 @@ The fake PayPal (`server/test/fakepaypal.js`) is for tests only. The server acce
 
 `server/paypal.js` PayPal client · `server/pay.js` the state machine, routes, room cards and audit trail · `server/access.js` (payment cards are server-only) · `agents/src/room.js` `requestPayment`, `agents/src/agent.js` the `request_payment` tool · `app/pay-card.js` the card and the History rows, wired in `app/prototype.html` and `app/vespr-client.js` · `scripts/paypal-smoke.mjs`.
 
-HTTP routes (all under `/api/pay/`): `GET _status`, `GET <room>`, `POST <room>/request` (agents), `POST <room>/answer` (people), `POST <room>/refund` (people), `POST <room>/check`, and the buyer's browser lands on `GET return` or `GET cancel`.
+HTTP routes (all under `/api/pay/`): `GET _status`, `GET <room>`, `POST <room>/request` (agents), `POST <room>/answer` (people), `POST <room>/refund` (people), `POST <room>/check`, and the buyer's browser lands on `GET return/<nonce>?token=<order id>` or `GET cancel/<nonce>?token=<order id>`.
 
 ## Honest limits
 

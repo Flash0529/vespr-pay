@@ -3,6 +3,7 @@
 # the environment, then reads the environment of every process the stack started: the SERVER must have the credentials (so this test cannot pass for the wrong reason), and the agent, the web
 # server and anything they started must have none of them. Linux only (/proc). Nothing is contacted: the fake keys are never used, no PayPal call is made.
 set -u
+[ -r /proc/self/environ ] || { echo "demo stack env tests skipped: needs /proc (Linux)"; exit 0; } # the check reads /proc/<pid>/environ; elsewhere (macOS) it skips instead of failing
 ROOT=$(cd "$(dirname "$0")/.." && pwd); D=$(mktemp -d /tmp/vespr-envtest-XXXXXX); fails=0
 cleanup() { VESPR_DEMO_DIR=$D VESPR_DEMO_PORT=$P "$ROOT/scripts/demo-stack.sh" stop >/dev/null 2>&1; rm -rf "$D" "$D.start.log"; }
 trap cleanup EXIT
