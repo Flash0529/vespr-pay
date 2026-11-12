@@ -1,0 +1,65 @@
+# VESPR judge demo on one VM (Nebius AI Cloud or any Docker host with a public name). Two judge identities share one workspace ("demo"),
+# so a judge can open both and watch two people and an AI agent edit the same file. Everything is capped: memory, processes, CPU, and the AI token budget.
+#   ./make-env.sh DOMAIN   then   ../deploy-to-vm.sh ...   (see README.md)
+name: murmio-judge
+x-logs: &logs   # container logs are capped (30 MB a service); the Docker default grows until the disk is full
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+x-hardening: &hardening
+  <<: *logs
+  restart: unless-stopped
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: ["ALL"]
+services:
+  caddy:
+    <<: *logs
+    image: caddy:2
+    restart: unless-stopped
+    mem_limit: 256m
+    pids_limit: 200
+    ports: ["80:80", "443:443"]
+    environment: { DOMAIN: "${DOMAIN}" }
+    volumes: [ "./Caddyfile:/etc/caddy/Caddyfile:ro", "caddy-data:/data", "../../app:/srv/app:ro", "../../site:/srv/site:ro" ]
+    depends_on: [collab, ide-judge1, ide-judge2]
+  collab:
+    <<: *hardening
+    build: ../../server
+    user: "1000:1000"
+    mem_limit: 768m
+    pids_limit: 200
+    environment: { MURMIO_SUGGEST_UPSTREAM: "http://agent-coder:8242/suggest", MURMIO_UPLOAD_MAX_MB: "10", MURMIO_UPLOAD_ROOM_MB: "100", MURMIO_AUTH: "1", VESPR_ACCESS: "1", VESPR_AGENT_NAMES: "coder", VESPR_AUTH_TRUST_PROXY: "1", VESPR_AUTH_BASE_URL: "https://vespr.online", VESPR_AUTH_ALLOWED_DOMAINS: "*", VESPR_AUTH_ALLOWED_ORIGINS: "https://vespr.online,https://www.vespr.online,https://${DOMAIN},https://www.${DOMAIN}", PAYPAL_CLIENT_ID: "${PAYPAL_CLIENT_ID:-}", PAYPAL_CLIENT_SECRET: "${PAYPAL_CLIENT_SECRET:-}", VESPR_PAY_BASE_URL: "https://collab.${DOMAIN}" }   # PayPal SANDBOX payments for agents (docs/PAYPAL.md): empty keys = "not set up"; PayPal sends the buyer back to the collab server. This one is on the public internet: small upload caps (10 MB a file, 100 MB a workspace)
+    env_file: [ { path: ./auth.env, required: false } ]   # sign-in providers and mail (from secret drop box via vespr-auth-sync; never in git)
+    volumes: [ "collab-data:/data", "./tokens:/run/secrets/murmio-tokens:ro", "../../app/file-store.js:/app/file-store.js:ro" ]   # shared with the app (server imports ../app/file-store.js = /app/ here)
+  agent-coder:
+    <<: *hardening
+    build: ../../agents
+    user: "1000:1000"
+    mem_limit: 1536m
+    pids_limit: 400
+    cpus: 1.5
+    environment:
+      MURMIO_SERVER: ws://collab:8241
+      MURMIO_ROOM: demo
+      MURMIO_TOKEN: "${TOKEN_AGENT}"
+      AGENT_NAME: coder
+      MURMIO_HUMAN_RUNS: "${MURMIO_HUMAN_RUNS:-0}"   # the app's Run button executes workspace code inside this container, next to the model key and the token list: off on the public demo unless the operator sets 1
+      NEBIUS_API_KEY: "${NEBIUS_API_KEY}"
+      TAVILY_API_KEY: "${TAVILY_API_KEY:-}"
+      MURMIO_PUBLIC_URL: "https://collab.${DOMAIN}"          # previews are served under the realtime server
+      MURMIO_TOKEN_CAP: "${MURMIO_TOKEN_CAP:-600000}"          # AI tokens per 24 hours for the whole demo (about 30 tasks); 0 = no limit
+    volumes: [ "./tokens:/run/secrets/murmio-tokens:ro", "../../app/file-store.js:/app/file-store.js:ro", "../../app/access-panel.js:/app/access-panel.js:ro" ]   # shared with the app
+    depends_on: [collab]
+  ide-judge1: &ide
+    <<: *hardening
+    build: ../../ide
+    mem_limit: 768m        # the public code-server boxes run anyone-with-the-password code: kept small (the team, 2026-11-07: limit now, retire after launch prep)
+    memswap_limit: 768m
+    pids_limit: 150
+    cpus: 0.5
+    environment: { MURMIO_USER: judge1, MURMIO_TOKEN: "${TOKEN_JUDGE1}", IDE_TOKEN: "${IDE_TOKEN_JUDGE1}", MURMIO_ROOM: demo, MURMIO_SERVER: "wss://collab.${DOMAIN}" }
+    volumes: [ "../../extensions/murmio-collab:/ext-src:ro", "./sample:/sample:ro", "ws-judge1:/workspace" ]
+    depends_on: [collab]
+  ide-judge2:
+    <<: *ide
+    environment: { MURMIO_USER: judge2, MURMIO_TOKEN: "${TOKEN_JUDGE2}", IDE_TOKEN: "${IDE_TOKEN_JUDGE2}", MURMIO_ROOM: demo, MURMIO_SERVER: "wss://collab.${DOMAIN}" }
+    volumes: [ "../../extensions/murmio-collab:/ext-src:ro", "./sample:/sample:ro", "ws-judge2:/workspace" ]
+volumes: { collab-data: {}, caddy-data: {}, ws-judge1: {}, ws-judge2: {} }

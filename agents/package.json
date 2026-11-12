@@ -1,0 +1,16 @@
+{
+  "name": "murmio-agents",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test/agent.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "y-websocket": "2.1.0",
+    "yjs": "^13.6.0"
+  }
+}

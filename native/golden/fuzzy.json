@@ -1,0 +1,674 @@
+{
+ "module": "fuzzy",
+ "generated": "from app/fuzzy.js",
+ "constants": {
+  "MAX_RESULTS": 50,
+  "MAX_TEXT": 300
+ },
+ "cases": [
+  {
+   "fn": "score",
+   "args": [
+    "cpy",
+    "cart.py"
+   ],
+   "result": 411
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a",
+    "a"
+   ],
+   "result": 160
+  },
+  {
+   "fn": "score",
+   "args": [
+    "b",
+    "ab"
+   ],
+   "result": 104
+  },
+  {
+   "fn": "score",
+   "args": [
+    "b",
+    "a_b"
+   ],
+   "result": 128
+  },
+  {
+   "fn": "score",
+   "args": [
+    "ab",
+    "xab"
+   ],
+   "result": 229
+  },
+  {
+   "fn": "score",
+   "args": [
+    "ab",
+    "axb"
+   ],
+   "result": 264
+  },
+  {
+   "fn": "score",
+   "args": [
+    "CP",
+    "cart.py"
+   ],
+   "result": 275,
+   "note": "case bonus: exact-case letters score 5 more"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "cp",
+    "CART.PY"
+   ],
+   "result": 275
+  },
+  {
+   "fn": "score",
+   "args": [
+    "c a r t",
+    "cart"
+   ],
+   "result": 535,
+   "note": "spaces in the query are ignored"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "",
+    "anything"
+   ],
+   "result": 0
+  },
+  {
+   "fn": "score",
+   "args": [
+    "   ",
+    "anything"
+   ],
+   "result": 0
+  },
+  {
+   "fn": "score",
+   "args": [
+    "zzz",
+    "cart.py"
+   ],
+   "result": null
+  },
+  {
+   "fn": "score",
+   "args": [
+    "zq",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazq"
+   ],
+   "result": null,
+   "note": "text is cut to MAX_TEXT (300) first, so the match past it is lost"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a",
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa"
+   ],
+   "result": 1
+  },
+  {
+   "fn": "score",
+   "args": [
+    "src/app",
+    "src/app/main.ts"
+   ],
+   "result": 927
+  },
+  {
+   "fn": "score",
+   "args": [
+    "mts",
+    "src/app/main.ts"
+   ],
+   "result": 373
+  },
+  {
+   "fn": "score",
+   "args": [
+    "é",
+    "café"
+   ],
+   "result": 102,
+   "note": "non-ASCII letters"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "i",
+    "İstanbul"
+   ],
+   "result": 148,
+   "note": "trap: JS toLowerCase turns İ into two code units (i + combining dot)"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "ı",
+    "IRMAK"
+   ],
+   "result": null,
+   "note": "trap: dotless ı; a culture-aware lowercase would differ"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "ss",
+    "STRASSE"
+   ],
+   "result": 250
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a",
+    "a b"
+   ],
+   "result": 158
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a b",
+    "ab"
+   ],
+   "result": 285,
+   "note": "trap: JS \\s matches the no-break space (U+00A0)"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a﻿b",
+    "ab"
+   ],
+   "result": 285,
+   "note": "trap: JS \\s matches U+FEFF; .NET \\s does not"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a b",
+    "ab"
+   ],
+   "result": 285,
+   "note": "em space"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "😀",
+    "x😀y"
+   ],
+   "result": 228,
+   "note": "surrogate pairs: both sides count UTF-16 code units"
+  },
+  {
+   "fn": "score",
+   "args": [
+    null,
+    "a"
+   ],
+   "result": null,
+   "note": "js-only"
+  },
+  {
+   "fn": "score",
+   "args": [
+    "a",
+    42
+   ],
+   "result": null,
+   "note": "js-only"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "cpy",
+    [
+     "readme.md",
+     "cart.py",
+     "copy.py",
+     "src/cart_py.txt"
+    ]
+   ],
+   "result": [
+    "cart.py",
+    "copy.py",
+    "src/cart_py.txt"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "",
+    [
+     "b",
+     "a",
+     "c"
+    ]
+   ],
+   "result": [
+    "b",
+    "a",
+    "c"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "ba",
+     "ab",
+     "a",
+     "cab"
+    ]
+   ],
+   "result": [
+    "a",
+    "ab",
+    "ba",
+    "cab"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "x",
+    [
+     "ax",
+     "bx",
+     "cx"
+    ]
+   ],
+   "result": [
+    "ax",
+    "bx",
+    "cx"
+   ],
+   "note": "ties keep the original order"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a0",
+     "a1",
+     "a2",
+     "a3",
+     "a4",
+     "a5",
+     "a6",
+     "a7",
+     "a8",
+     "a9",
+     "a10",
+     "a11",
+     "a12",
+     "a13",
+     "a14",
+     "a15",
+     "a16",
+     "a17",
+     "a18",
+     "a19",
+     "a20",
+     "a21",
+     "a22",
+     "a23",
+     "a24",
+     "a25",
+     "a26",
+     "a27",
+     "a28",
+     "a29",
+     "a30",
+     "a31",
+     "a32",
+     "a33",
+     "a34",
+     "a35",
+     "a36",
+     "a37",
+     "a38",
+     "a39",
+     "a40",
+     "a41",
+     "a42",
+     "a43",
+     "a44",
+     "a45",
+     "a46",
+     "a47",
+     "a48",
+     "a49",
+     "a50",
+     "a51",
+     "a52",
+     "a53",
+     "a54",
+     "a55",
+     "a56",
+     "a57",
+     "a58",
+     "a59",
+     "a60",
+     "a61",
+     "a62",
+     "a63",
+     "a64",
+     "a65",
+     "a66",
+     "a67",
+     "a68",
+     "a69",
+     "a70",
+     "a71",
+     "a72",
+     "a73",
+     "a74",
+     "a75",
+     "a76",
+     "a77",
+     "a78",
+     "a79"
+    ]
+   ],
+   "result": [
+    "a0",
+    "a1",
+    "a2",
+    "a3",
+    "a4",
+    "a5",
+    "a6",
+    "a7",
+    "a8",
+    "a9",
+    "a10",
+    "a11",
+    "a12",
+    "a13",
+    "a14",
+    "a15",
+    "a16",
+    "a17",
+    "a18",
+    "a19",
+    "a20",
+    "a21",
+    "a22",
+    "a23",
+    "a24",
+    "a25",
+    "a26",
+    "a27",
+    "a28",
+    "a29",
+    "a30",
+    "a31",
+    "a32",
+    "a33",
+    "a34",
+    "a35",
+    "a36",
+    "a37",
+    "a38",
+    "a39",
+    "a40",
+    "a41",
+    "a42",
+    "a43",
+    "a44",
+    "a45",
+    "a46",
+    "a47",
+    "a48",
+    "a49"
+   ],
+   "note": "capped at MAX_RESULTS (50)"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2",
+     "a3",
+     "a4"
+    ],
+    {
+     "$undefined": true
+    },
+    2
+   ],
+   "result": [
+    "a1",
+    "a2"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2",
+     "a3"
+    ],
+    {
+     "$undefined": true
+    },
+    2.9
+   ],
+   "result": [
+    "a1",
+    "a2"
+   ],
+   "note": "limit is floored"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2"
+    ],
+    {
+     "$undefined": true
+    },
+    0
+   ],
+   "result": [
+    "a1"
+   ],
+   "note": "limit at least 1"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2"
+    ],
+    {
+     "$undefined": true
+    },
+    -5
+   ],
+   "result": [
+    "a1"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2"
+    ],
+    {
+     "$undefined": true
+    },
+    {
+     "$inf": 1
+    }
+   ],
+   "result": [
+    "a1",
+    "a2"
+   ],
+   "note": "non-finite limit -> MAX_RESULTS"
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "a",
+    [
+     "a1",
+     "a2"
+    ],
+    {
+     "$undefined": true
+    },
+    {
+     "$nan": true
+    }
+   ],
+   "result": [
+    "a1",
+    "a2"
+   ]
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "q",
+    []
+   ],
+   "result": []
+  },
+  {
+   "fn": "rank",
+   "args": [
+    "q",
+    null
+   ],
+   "result": [],
+   "note": "js-only"
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "cpy",
+    "cart.py"
+   ],
+   "result": [
+    [
+     0,
+     1
+    ],
+    [
+     5,
+     7
+    ]
+   ]
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "car",
+    "cart.py"
+   ],
+   "result": [
+    [
+     0,
+     3
+    ]
+   ]
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "",
+    "cart.py"
+   ],
+   "result": []
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "zz",
+    "cart.py"
+   ],
+   "result": []
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "ab",
+    "xaxb"
+   ],
+   "result": [
+    [
+     1,
+     2
+    ],
+    [
+     3,
+     4
+    ]
+   ]
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "i",
+    "İstanbul"
+   ],
+   "result": [
+    [
+     0,
+     1
+    ]
+   ],
+   "note": "trap: index positions after JS lowercasing"
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    "zq",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaazq"
+   ],
+   "result": []
+  },
+  {
+   "fn": "highlight",
+   "args": [
+    5,
+    "a"
+   ],
+   "result": [],
+   "note": "js-only"
+  }
+ ]
+}

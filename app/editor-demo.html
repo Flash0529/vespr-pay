@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SDE editor demo</title>
+<!-- Two editors on one page, bound to two Y.Docs that exchange updates in memory (no server), with buttons for the edge cases.
+     Live mode mounts ONE editor on a real room: editor-demo.html?live=1&server=<ws url>&room=<room>&name=<name>&file=<path>#token=<token>
+     Options: ?theme=light, ?latency=<ms> (pair mode). window.__demo exposes everything for browser tests. -->
+<style>
+:root{--bg:#131314;--side:#171718;--surface:#1c1c1e;--surface2:#232326;--hair:rgba(255,255,255,.075);--hair2:rgba(255,255,255,.12);--text:#ececee;--muted:#9b9ba3;--faint:#80808a;--input:#1b1b1d;--agent:#6c9dff;--warn:#fbbf77;--ok:#86efac;--bad:#fda4af;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono","Geist Mono","JetBrains Mono",Menlo,Consolas,monospace;color-scheme:dark}
+[data-theme=light]{--bg:#f7f6f3;--side:#efeeea;--surface:#ffffff;--surface2:#f1f0ec;--hair:rgba(20,20,22,.09);--hair2:rgba(20,20,22,.15);--text:#1b1b1d;--muted:#5f5f68;--faint:#6b6b73;--input:#ffffff;--agent:#1f56e0;--warn:#a35f08;--ok:#1a7f45;--bad:#b4234a;color-scheme:light}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:12px/1.5 var(--font);display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--hair);flex:none;flex-wrap:wrap}
+header h1{font-size:12.5px;margin:0;font-weight:600}
+header .sp{flex:1}
+button,select{font:11px var(--font);color:var(--text);background:var(--surface2);border:1px solid var(--hair2);border-radius:7px;padding:3px 10px;cursor:pointer}
+button:hover{border-color:var(--agent)} button:focus-visible,select:focus-visible{outline:2px solid var(--agent);outline-offset:1px}
+button[aria-pressed=true]{color:var(--agent);border-color:var(--agent)}
+.panes{flex:1;min-height:0;display:flex;gap:10px;padding:10px 14px 0}
+.pane{flex:1;min-width:0;display:flex;flex-direction:column;border:1px solid var(--hair);border-radius:10px;overflow:hidden;background:var(--surface)}
+.pane>header{padding:6px 10px;border-bottom:1px solid var(--hair);gap:8px;flex-wrap:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.who{font-weight:600;font-size:11.5px}
+.sync{margin-left:auto;font:10.5px var(--mono);color:var(--ok)} .sync.bad{color:var(--bad)}
+.host{flex:1;min-height:0}
+.stat{flex:none;padding:3px 10px;border-top:1px solid var(--hair);font:10.5px var(--mono);color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.panel{flex:none;padding:8px 14px 10px;display:flex;flex-direction:column;gap:6px}
+.btns{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btns label{color:var(--muted);font-size:11px;display:inline-flex;gap:5px;align-items:center}
+#log{font:10.5px/1.55 var(--mono);color:var(--muted);height:78px;overflow:auto;border:1px solid var(--hair);border-radius:8px;padding:5px 9px;background:var(--surface);white-space:pre-wrap}
+#log .ok{color:var(--ok)} #log .no{color:var(--bad)}
+.one .panes{padding-bottom:10px}
+</style>
+<script type="importmap">
+{ "imports": { "yjs": "./vendor/yjs.js", "y-websocket": "./vendor/y-websocket.js" } }
+</script>
+</head>
+<body>
+<header>
+  <h1>SDE editor demo</h1>
+  <span id="mode" style="color:var(--muted)"></span>
+  <span class="sp"></span>
+  <button id="theme" aria-pressed="false">Light</button>
+</header>
+<div class="panes" id="panes"></div>
+<div class="panel" id="panel"></div>
+
+<script type="module">
+import { fileStore } from './file-store.js'
+
+import * as Y from 'yjs'
+import { createEditor } from './vendor/editor.js'
+
+const q = new URLSearchParams(location.search)
+const hashParams = new URLSearchParams(location.hash.replace(/^#/, ''))
+const $ = id => document.getElementById(id)
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) k === 'class' ? (e.className = v) : e.setAttribute(k, v); for (const k of kids) e.append(k); return e }
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+const minute = () => Math.floor(Date.now() / 60000)
+const FILE = 'cart.py'
+const SEED = `def total(items):\n    t = 0\n    for it in items:\n        t += it["price"] * it["qty"]\n    return t\n\n\ndef discount(t, code):\n    if code == "SPRING":\n        return t * 0.9\n    return t\n`
+const colors = { alex: '#a5b4fc', sam: '#fbbf77', coder: '#6c9dff' }
+
+const setTheme = t => { document.documentElement.dataset.theme = t; $('theme').textContent = t === 'light' ? 'Dark' : 'Light'; $('theme').setAttribute('aria-pressed', String(t === 'light')) }
+setTheme(q.get('theme') === 'light' ? 'light' : 'dark')
+$('theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light')
+
+function pane (host, name, color) {
+  const sync = el('span', { class: 'sync' }, 'in sync'); const stat = el('div', { class: 'stat' }, ' ')
+  const box = el('div', { class: 'host', 'data-editor': name })
+  host.append(el('section', { class: 'pane' }, el('header', {}, el('span', { class: 'dot', style: `background:${color}` }), el('span', { class: 'who' }, name), sync), box, stat))
+  return { box, sync, stat }
+}
+const logBox = el('div', { id: 'log', role: 'log', 'aria-live': 'polite' })
+const log = (msg, ok) => { const l = el('div', ok === undefined ? {} : { class: ok ? 'ok' : 'no' }, (ok === undefined ? '' : ok ? '✓ ' : '✗ ') + msg); logBox.append(l); logBox.scrollTop = logBox.scrollHeight; return ok }
+
+// who wrote the character before the caret (the authorship attributes ride on every insert)
+function authorAt (yt, i) {
+  let pos = 0
+  for (const op of yt.toDelta()) { const n = op.insert.length; if (i - 1 < pos + n && i - 1 >= pos) return op.attributes || {}; pos += n }
+  return {}
+}
+function describe (a) { return !a.by ? 'nobody (imported)' : a.by === 'import' ? 'import' : a.ai ? `${a.by} (agent${a.model ? ', ' + a.model : ''})` : a.by }
+function wireStatus (handle, yt, p) {
+  const upd = () => {
+    const r = handle.view.state.selection.main; const l = handle.view.state.doc.lineAt(r.head)
+    p.stat.textContent = `Ln ${l.number}, Col ${r.head - l.from + 1}${r.empty ? '' : ' · ' + (r.to - r.from) + ' selected'} · char before the caret written by ${describe(authorAt(yt, r.head))}`
+    const ok = handle.isInSync(); p.sync.textContent = ok ? 'in sync' : 'OUT OF SYNC'; p.sync.className = 'sync' + (ok ? '' : ' bad')
+  }
+  handle.onSelection(upd); handle.onChange(upd); upd(); return upd
+}
+
+// ─────────────────────────────────────────────────────────────────── live mode: one editor on a real room
+async function live () {
+  document.body.classList.add('one')
+  const server = q.get('server'); const room = q.get('room'); const name = q.get('name') || 'alex'; const token = hashParams.get('token')
+  if (!server || !room || !token) { $('panes').append(el('p', { style: 'padding:20px;color:var(--bad)' }, 'Live mode needs ?live=1&server=<ws url>&room=<room>&name=<name>#token=<token>')); return }
+  history.replaceState(null, '', location.pathname + location.search) // the token is not for the address bar
+  $('mode').textContent = `live · ${room} · you are ${name}`
+  const { createClient } = await import('./vespr-client.js')
+  const c = createClient({ server, room, token, name, color: q.get('color') || colors.alex })
+  await c.ready
+  const files = c.files
+  const sel = el('select', { 'aria-label': 'file' }); const list = () => [...files.keys()].sort()
+  const demo = window.__demo = { mode: 'live', Y, client: c, doc: c.doc, provider: c.provider, awareness: c.provider.awareness, files: list, theme: setTheme, handle: null, file: null, log }
+  const host = $('panes'); let p = null
+  const open = file => {
+    if (demo.handle) demo.handle.destroy(); host.replaceChildren(); demo.handle = null
+    const yt = files.get(file)
+    if (!yt) { host.append(el('p', { style: 'padding:20px;color:var(--bad)' }, `No file "${file}" in this room. Files: ${list().join(', ') || '(none)'}`)); return }
+    p = pane(host, `${name} · ${file}`, colors.alex)
+    demo.file = file; demo.ytext = yt
+    demo.handle = createEditor({ parent: p.box, Y, ytext: yt, awareness: c.provider.awareness, user: { name, color: q.get('color') || colors.alex }, file, claims: c.doc.getMap('claims') })
+    demo.a = demo.handle; wireStatus(demo.handle, yt, p)
+  }
+  demo.open = file => { sel.value = file; open(file) }
+  $('panel').append(el('div', { class: 'btns' }, el('label', {}, 'File ', sel), el('button', { id: 'toggle-ro' }, 'Read-only')), logBox)
+  for (const f of list()) sel.append(el('option', { value: f }, f))
+  sel.onchange = () => open(sel.value)
+  $('toggle-ro').onclick = () => { if (!demo.handle) return; const ro = demo.handle.view.state.readOnly; demo.handle.setReadOnly(!ro); $('toggle-ro').setAttribute('aria-pressed', String(!ro)) }
+  const first = q.get('file') || list()[0]; if (first) { sel.value = first; open(first) }
+}
+
+// ─────────────────────────────────────────────────────────────────── pair mode: two peers, updates exchanged in memory
+class MemAwareness { // the same interface as the websocket provider's awareness, over one shared table
+  constructor (clientID, table, bus) { this.clientID = clientID; this.table = table; this.bus = bus }
+  getStates () { return this.table }
+  getLocalState () { return this.table.get(this.clientID) || null }
+  setLocalStateField (k, v) { this.table.set(this.clientID, { ...(this.table.get(this.clientID) || {}), [k]: v }); for (const f of [...this.bus]) f() }
+  on (ev, f) { if (ev === 'change') this.bus.add(f) }
+  off (ev, f) { if (ev === 'change') this.bus.delete(f) }
+}
+
+function pairMode () {
+  $('mode').textContent = 'two peers, updates exchanged in memory (no server)'
+  const NET = Symbol('net')
+  const docA = new Y.Doc(); const docB = new Y.Doc(); const ytA = new Y.Text()
+  fileStore(docA).set(FILE, ytA); ytA.insert(0, SEED, { by: 'import', t: minute() })
+  Y.applyUpdate(docB, Y.encodeStateAsUpdate(docA), NET)
+  const ytB = fileStore(docB).get(FILE)
+  const net = { offline: false, latency: Number(q.get('latency') || 0), qAB: [], qBA: [] }
+  const send = (u, to, queue) => {
+    if (net.offline) { queue.push(u); return }
+    if (net.latency) setTimeout(() => Y.applyUpdate(to, u, NET), net.latency * (0.5 + Math.random())); else Y.applyUpdate(to, u, NET)
+  }
+  docA.on('update', (u, o) => { if (o !== NET) send(u, docB, net.qAB) }); docB.on('update', (u, o) => { if (o !== NET) send(u, docA, net.qBA) })
+  const flush = () => { for (const u of net.qAB.splice(0)) Y.applyUpdate(docB, u, NET); for (const u of net.qBA.splice(0)) Y.applyUpdate(docA, u, NET) }
+  const setOffline = b => { net.offline = b; if (!b) flush(); $('toggle-net').textContent = b ? 'Go online' : 'Go offline'; $('toggle-net').setAttribute('aria-pressed', String(b)) }
+
+  const table = new Map(); const bus = new Set()
+  const awA = new MemAwareness(docA.clientID, table, bus); const awB = new MemAwareness(docB.clientID, table, bus)
+  awA.setLocalStateField('user', { name: 'Alex Morgan', color: colors.alex, isAgent: false }); awB.setLocalStateField('user', { name: 'Sam', color: colors.sam, isAgent: false })
+  const claimsA = docA.getMap('claims')
+
+  const host = $('panes'); const pa = pane(host, 'Alex Morgan', colors.alex); const pb = pane(host, 'Sam', colors.sam)
+  const describeAuthor = attrs => (attrs.msg === 'm1' ? { request: 'Add a comment above the return in total() and keep the discount rule as it is' } : null) // what the shell does with attrs.msg: finds the chat message
+  const a = createEditor({ parent: pa.box, Y, ytext: ytA, awareness: awA, user: { name: 'Alex Morgan', color: colors.alex }, file: FILE, claims: claimsA, describeAuthor })
+  const b = createEditor({ parent: pb.box, Y, ytext: ytB, awareness: awB, user: { name: 'Sam', color: colors.sam }, file: FILE, describeAuthor })
+  const updA = wireStatus(a, ytA, pa); const updB = wireStatus(b, ytB, pb)
+  ytA.observe(() => updA()); ytB.observe(() => updB())
+
+  const settle = async () => { await sleep(net.latency * 2 + 60) }
+  const state = () => {
+    const x = a.getText(); const y = b.getText()
+    return { a: x, b: y, ya: ytA.toString(), yb: ytB.toString(), converged: x === y && x === ytA.toString() && y === ytB.toString(), inSync: a.isInSync() && b.isInSync(), length: x.length }
+  }
+  const verdict = (name, extra = {}) => { const s = state(); const ok = s.converged && s.inSync && extra.ok !== false; log(`${name}: ${!s.converged || !s.inSync ? 'EDITORS AND SHARED TEXTS DIFFER' : extra.ok === false ? 'check failed' : 'both editors and both shared texts are identical (' + s.length + ' chars)'}${extra.note ? ' · ' + extra.note : ''}`, ok); return { ok, ...s, ...extra } }
+  const caret = h => h.view.state.selection.main.head
+  const rnd = n => Math.floor(Math.random() * n)
+  // where to act: found by pattern in the CURRENT text (earlier scenarios and random typing change it), with a safe fallback, never inside a surrogate pair
+  const find = (text, pattern, add = 0, fallback = 0) => { const k = text.indexOf(pattern); return k < 0 ? fallback : k + add }
+  const safeAt = (text, i) => { i = Math.max(0, Math.min(text.length, i)); const hi = text.charCodeAt(i - 1); const lo = text.charCodeAt(i); return i > 0 && i < text.length && hi >= 0xD800 && hi <= 0xDBFF && lo >= 0xDC00 && lo <= 0xDFFF ? i - 1 : i }
+  const WORDS = ['alpha ', 'beta\n', 'x', 'gamma ', '= ', 'qty', '(1)', '😀', '日本', ' ']
+
+  const scenarios = {
+    async typeBoth (ms = 1500) { // two people type at once, at random places, with random delay between them
+      if (!net.latency) net.latency = 40
+      const typist = h => (async () => { const end = Date.now() + ms; while (Date.now() < end) { const len = h.view.state.doc.length; const at = rnd(len + 1)
+        if (Math.random() < 0.2 && len > 4) { const f = rnd(len - 2); h.deleteRange(f, f + 1 + rnd(2)) } else h.insertAt(at, WORDS[rnd(WORDS.length)].replace('😀', 'e').replace('日本', 'x')); await sleep(10 + rnd(25)) } })()
+      await Promise.all([typist(a), typist(b)]); await settle(); await settle()
+      return verdict('type in both at once')
+    },
+    async sameSpot () { // the exact same position at the same instant: the order must be the same everywhere
+      setOffline(true); const at = find(a.getText(), 'return t\n', 7, 10)
+      a.insertAt(at, 'AAA'); b.insertAt(at, 'BBB'); setOffline(false); await settle()
+      return verdict('same spot, same instant', { note: JSON.stringify(a.getText().slice(at - 2, at + 8)) })
+    },
+    async deleteWhileTyping () { // one deletes a range while the other types inside it
+      const from = find(a.getText(), 'for it', 0, 10); const to = from + 30
+      setOffline(true); a.deleteRange(from, to); b.insertAt(from + 10, ' <typed-inside> '); setOffline(false); await settle()
+      return verdict('delete a range someone is typing in')
+    },
+    async unicode () {
+      a.insertAt(0, '# 😀 日本語 é — 👨‍👩‍👧\n'); b.insertAt(b.view.state.doc.length, '# é 𝒳\n'); await settle()
+      const s = state(); return verdict('emoji, CJK, combining marks', { ok: s.a.length === ytA.length && s.b.length === ytB.length, note: `${ytA.length} UTF-16 units` })
+    },
+    async offline () { // both edit while disconnected, then reconnect
+      setOffline(true)
+      for (let i = 0; i < 25; i++) { a.insertAt(rnd(a.view.state.doc.length + 1), `a${i} `); b.insertAt(rnd(b.view.state.doc.length + 1), `b${i}\n`) }
+      const during = a.getText() !== b.getText(); setOffline(false); await settle()
+      return verdict('offline edits merged after reconnect', { ok: during, note: during ? 'they differed while offline' : 'they did not differ while offline (unexpected)' })
+    },
+    async undoScope () { // undo removes only your own typing
+      a.setSelection(a.view.state.doc.length); a.binding.stopCapturing(); b.binding.stopCapturing()
+      const start = a.view.state.doc.length
+      a.insertAt(start, '# mine\n'); await settle(); b.insertAt(b.view.state.doc.length, '# theirs\n'); await settle()
+      const undone = a.undo(); await settle()
+      const s = state(); const ok = undone && !s.a.includes('# mine') && s.a.includes('# theirs')
+      return verdict('undo removes only my own change', { ok })
+    },
+    async bigPaste (kb = 200) {
+      const line = 'def f%d(x):\n    return x * %d + (x ^ %d)  # generated line\n'; let s = ''; for (let i = 0; s.length < kb * 1024; i++) s += line.replace(/%d/g, i)
+      const t0 = performance.now(); a.insertAt(a.view.state.doc.length, s); await settle(); const ms = Math.round(performance.now() - t0)
+      return verdict('a ' + kb + ' KB paste', { note: ms + ' ms to reach the other editor' })
+    },
+    async agent () { // an agent writes the way agents/src/room.js does: attributes on the insert, a selection in awareness
+      const attrs = () => ({ by: 'coder', ai: true, model: 'demo-model', msg: 'm1', t: minute() }); const txt = ytA.toString(); const at = safeAt(txt, find(txt, '    return t\n', 4, txt.length)) // the agent writes straight into the shared text, so it must not cut an emoji either
+      docA.transact(() => ytA.insert(at, '# agent was here\n    ', attrs()), 'agent')
+      table.set(777, { user: { name: 'coder', color: colors.coder, isAgent: true, model: 'demo-model' }, cursor: { file: FILE, anchor: JSON.parse(JSON.stringify(Y.relativePositionToJSON(Y.createRelativePositionFromTypeIndex(ytA, at)))), head: JSON.parse(JSON.stringify(Y.relativePositionToJSON(Y.createRelativePositionFromTypeIndex(ytA, at + 20)))) } })
+      for (const f of [...bus]) f(); await settle()
+      const mark = ytA.toString().indexOf('# agent was here'); if (mark < 0) return log('agent: its text is not in the document', false)
+      b.insertAt(mark + 5, 'XX'); await settle() // a person typing inside the agent's text must be recorded as the person
+      const x = authorAt(ytA, mark + 6); const y = authorAt(ytA, mark + 3)
+      const ok = x.by === 'Sam' && !x.ai && y.by === 'coder' && y.ai === true
+      return verdict('agent edit, then a person types inside it', { ok, note: `inside: ${describe(x)}; beside: ${describe(y)}` })
+    },
+    problems () {
+      a.setProblems([{ line: 4, message: 'NameError: name "qty" is not defined' }, { line: 9, message: 'unexpected indent' }]); a.goToLine(4)
+      const l = a.view.state.doc.line(9)
+      a.markRecent([{ from: l.from, to: l.to, kind: 'add', by: 'coder' }, { from: a.view.state.doc.line(5).from, to: a.view.state.doc.line(5).from, kind: 'del', by: 'coder' }])
+      return log('problems on lines 4 and 9, green range on line 9, red tick on line 5, went to line 4', true)
+    },
+    clearMarks () { a.setProblems([]); a.markRecent([]); log('cleared problems and marks', true) },
+    async cursors () { a.setSelection(30, 60); b.setSelection(140); await sleep(250); const n = a.remoteCursors().length + b.remoteCursors().length; return log(`carets published: each editor sees ${a.remoteCursors().length} other cursor(s)`, n >= 2) }
+  }
+  const demo = window.__demo = { mode: 'pair', Y, a, b, ytA, ytB, docA, docB, awA, awB, net, setOffline, flush, state, scenarios, theme: setTheme, log, settle }
+
+  const labels = { typeBoth: 'Type in both at once', sameSpot: 'Same spot, same instant', deleteWhileTyping: 'Delete where they type', unicode: 'Emoji / CJK / marks', offline: 'Offline, then merge', undoScope: 'Undo only mine', bigPaste: '200 KB paste', agent: 'Agent edit + authorship', problems: 'Problems + marks', clearMarks: 'Clear marks', cursors: 'Select + show cursors' }
+  const btns = el('div', { class: 'btns' })
+  for (const [k, label] of Object.entries(labels)) { const bt = el('button', { 'data-scenario': k }, label); bt.onclick = async () => { bt.disabled = true; try { await scenarios[k]() } catch (e) { log(k + ' threw: ' + e.message, false); console.error(e) } bt.disabled = false }; btns.append(bt) }
+  const toggleNet = el('button', { id: 'toggle-net', 'aria-pressed': 'false' }, 'Go offline'); toggleNet.onclick = () => setOffline(!net.offline)
+  const ro = el('button', { id: 'toggle-ro', 'aria-pressed': 'false' }, 'Sam read-only'); ro.onclick = () => { const on = !b.view.state.readOnly; b.setReadOnly(on); ro.setAttribute('aria-pressed', String(on)) }
+  const lat = el('select', { id: 'latency', 'aria-label': 'network delay' }, ...[0, 40, 200].map(ms => { const o = el('option', { value: String(ms) }, ms ? `delay ~${ms} ms` : 'no delay'); if (ms === net.latency) o.selected = true; return o }))
+  lat.onchange = () => { net.latency = Number(lat.value) }
+  btns.append(toggleNet, ro, lat)
+  $('panel').append(btns, logBox)
+  a.focus()
+}
+
+if (q.get('live') === '1') live().catch(e => { document.body.append(el('pre', { style: 'color:var(--bad);padding:14px' }, 'live mode failed: ' + e.message)) }); else pairMode()
+</script>
+</body>
+</html>

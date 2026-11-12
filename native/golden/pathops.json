@@ -1,0 +1,1065 @@
+{
+ "module": "pathops",
+ "generated": "from app/pathops.js",
+ "constants": {
+  "FOLDER_MARKER": ".keep",
+  "MAX_DEPTH": 12,
+  "MAX_MOVES": 500,
+  "MAX_PATH": 300,
+  "MAX_SEGMENT": 120
+ },
+ "cases": [
+  {
+   "fn": "validateName",
+   "args": [
+    "a.py"
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "  a.py  "
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "./a.py"
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    ""
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Give a name"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "   "
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Give a name"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "/a.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Use / between folders, with no / at the start"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a\\b"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Use / between folders, with no / at the start"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a\u0007b"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That name has a hidden character"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a//b"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "A folder or file name is empty"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a/./b"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Names cannot use . or .. as a step"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a/../b"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Names cannot use . or .. as a step"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    ".."
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Names cannot use . or .. as a step"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "A name is too long"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   ],
+   "result": {
+    "ok": true,
+    "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "d/d/d/d/d/d/d/d/d/d/d/d/d"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That path is too long"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "d/d/d/d/d/d/d/d/d/d/d/d"
+   ],
+   "result": {
+    "ok": true,
+    "name": "d/d/d/d/d/d/d/d/d/d/d/d"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a b.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Use letters, numbers, dots, dashes and underscores"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "café.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Use letters, numbers, dots, dashes and underscores"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "name."
+   ],
+   "result": {
+    "ok": false,
+    "reason": "A name cannot end with a dot"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    ".git/config"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That folder is managed by git"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    ".GIT/x"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That folder is managed by git"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "dir/.keep"
+   ],
+   "result": {
+    "ok": false,
+    "reason": ".keep is reserved for empty folders"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "dir/.KEEP"
+   ],
+   "result": {
+    "ok": false,
+    "reason": ".keep is reserved for empty folders"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    " a.py "
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "﻿a.py"
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "a.py "
+   ],
+   "result": {
+    "ok": true,
+    "name": "a.py"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    "src/ok-name_1.ts"
+   ],
+   "result": {
+    "ok": true,
+    "name": "src/ok-name_1.ts"
+   }
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    null
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Give a name"
+   },
+   "note": "js-only"
+  },
+  {
+   "fn": "validateName",
+   "args": [
+    42
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Give a name"
+   },
+   "note": "js-only"
+  },
+  {
+   "fn": "joinPath",
+   "args": [
+    "src",
+    "a.py"
+   ],
+   "result": "src/a.py"
+  },
+  {
+   "fn": "joinPath",
+   "args": [
+    "/src/",
+    "/a.py"
+   ],
+   "result": "src/a.py"
+  },
+  {
+   "fn": "joinPath",
+   "args": [
+    "",
+    "a.py"
+   ],
+   "result": "a.py"
+  },
+  {
+   "fn": "joinPath",
+   "args": [
+    "src",
+    ""
+   ],
+   "result": "src"
+  },
+  {
+   "fn": "joinPath",
+   "args": [
+    "///",
+    "///x"
+   ],
+   "result": "x"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/a.py"
+   ],
+   "result": "file"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "SRC/A.PY"
+   ],
+   "result": "file",
+   "note": "case-insensitive"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src"
+   ],
+   "result": "folder"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/lib"
+   ],
+   "result": "folder"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "docs"
+   ],
+   "result": "folder"
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "nope"
+   ],
+   "result": null
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [],
+    "src"
+   ],
+   "result": null
+  },
+  {
+   "fn": "exists",
+   "args": [
+    [
+     "İ.py"
+    ],
+    "i̇.py"
+   ],
+   "result": "file",
+   "note": "trap: lowercase via JS rules"
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "d.py",
+    "file"
+   ],
+   "result": {
+    "ok": true,
+    "add": [
+     "src/d.py"
+    ],
+    "path": "src/d.py"
+   }
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "A.PY",
+    "file"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "There is already a file named src/A.PY"
+   },
+   "note": "clash ignores case"
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "",
+    "newdir",
+    "folder"
+   ],
+   "result": {
+    "ok": true,
+    "add": [
+     "newdir/.keep"
+    ],
+    "path": "newdir"
+   }
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "README.md",
+    "x.py",
+    "file"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "README.md is a file, so it cannot hold README.md/x.py"
+   },
+   "note": "a file cannot hold a file"
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "lib",
+    "folder"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "There is already a folder named src/lib"
+   }
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "x",
+    "link"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Unknown kind"
+   }
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "../x",
+    "file"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Names cannot use . or .. as a step"
+   }
+  },
+  {
+   "fn": "planCreate",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "d/d/d/d/d/d/d/d/d/d/d",
+    "f",
+    "folder"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That path is too long"
+   },
+   "note": "the marker makes it too deep"
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/a.py",
+    "src/z.py"
+   ],
+   "result": {
+    "ok": true,
+    "moves": [
+     [
+      "src/a.py",
+      "src/z.py"
+     ]
+    ]
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/a.py",
+    "src/b.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "There is already a file named src/b.py"
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/a.py",
+    "src/a.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "That is already its name"
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/a.py",
+    "src/A.py"
+   ],
+   "result": {
+    "ok": true,
+    "moves": [
+     [
+      "src/a.py",
+      "src/A.py"
+     ]
+    ]
+   },
+   "note": "case-only rename is allowed"
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "code"
+   ],
+   "result": {
+    "ok": true,
+    "moves": [
+     [
+      "src/a.py",
+      "code/a.py"
+     ],
+     [
+      "src/b.py",
+      "code/b.py"
+     ],
+     [
+      "src/lib/c.py",
+      "code/lib/c.py"
+     ]
+    ]
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "src/inner"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "A folder cannot move into itself"
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src",
+    "docs"
+   ],
+   "result": {
+    "ok": true,
+    "moves": [
+     [
+      "src/a.py",
+      "docs/a.py"
+     ],
+     [
+      "src/b.py",
+      "docs/b.py"
+     ],
+     [
+      "src/lib/c.py",
+      "docs/lib/c.py"
+     ]
+    ]
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src/lib/c.py",
+    "README.md/c.py"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "README.md is a file, so it cannot hold README.md/c.py"
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "README.md",
+    "src"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "There is already a folder named src"
+   },
+   "note": "a file onto a folder name"
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "nothing",
+    "x"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Nothing named that"
+   }
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "b/Z.py",
+     "b/a.py",
+     "b/_.py",
+     "b/B.py"
+    ],
+    "b",
+    "c"
+   ],
+   "result": {
+    "ok": true,
+    "moves": [
+     [
+      "b/B.py",
+      "c/B.py"
+     ],
+     [
+      "b/Z.py",
+      "c/Z.py"
+     ],
+     [
+      "b/_.py",
+      "c/_.py"
+     ],
+     [
+      "b/a.py",
+      "c/a.py"
+     ]
+    ]
+   },
+   "note": "moves sorted by code unit, not by culture"
+  },
+  {
+   "fn": "planRename",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    42,
+    "x"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Give the name to rename"
+   },
+   "note": "js-only"
+  },
+  {
+   "fn": "planDelete",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "src"
+   ],
+   "result": {
+    "ok": true,
+    "remove": [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py"
+    ],
+    "count": 3,
+    "kind": "folder"
+   }
+  },
+  {
+   "fn": "planDelete",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "SRC/LIB"
+   ],
+   "result": {
+    "ok": true,
+    "remove": [
+     "src/lib/c.py"
+    ],
+    "count": 1,
+    "kind": "folder"
+   }
+  },
+  {
+   "fn": "planDelete",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "README.md"
+   ],
+   "result": {
+    "ok": true,
+    "remove": [
+     "README.md"
+    ],
+    "count": 1,
+    "kind": "file"
+   }
+  },
+  {
+   "fn": "planDelete",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ],
+    "missing"
+   ],
+   "result": {
+    "ok": false,
+    "reason": "Nothing named that"
+   }
+  },
+  {
+   "fn": "planDelete",
+   "args": [
+    [
+     "z/b",
+     "z/B",
+     "z/a",
+     "z/_"
+    ],
+    "z"
+   ],
+   "result": {
+    "ok": true,
+    "remove": [
+     "z/B",
+     "z/_",
+     "z/a",
+     "z/b"
+    ],
+    "count": 4,
+    "kind": "folder"
+   },
+   "note": "trap: JS sort() is by code unit"
+  },
+  {
+   "fn": "isMarker",
+   "args": [
+    "docs/.keep"
+   ],
+   "result": true
+  },
+  {
+   "fn": "isMarker",
+   "args": [
+    "docs/.KEEP"
+   ],
+   "result": false
+  },
+  {
+   "fn": "isMarker",
+   "args": [
+    ".keep"
+   ],
+   "result": true
+  },
+  {
+   "fn": "visiblePaths",
+   "args": [
+    [
+     "src/a.py",
+     "src/b.py",
+     "src/lib/c.py",
+     "README.md",
+     "docs/.keep",
+     "Tests/x.py"
+    ]
+   ],
+   "result": [
+    "src/a.py",
+    "src/b.py",
+    "src/lib/c.py",
+    "README.md",
+    "Tests/x.py"
+   ]
+  },
+  {
+   "fn": "visiblePaths",
+   "args": [
+    []
+   ],
+   "result": []
+  }
+ ]
+}

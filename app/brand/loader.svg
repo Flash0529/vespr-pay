@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Loading">
+<title>Loading</title>
+<style>
+.p{fill:#2f6bff;stroke:#0c1a4a;stroke-width:.5;stroke-linejoin:round;stroke-opacity:0}
+.fx,.fy{transform-box:view-box;transform-origin:50px 50px}
+.fx{animation:fx 2.6s linear infinite}
+.fy{animation:fy 2.6s linear infinite}
+.ul{animation:sul 2.6s linear infinite} .lr{animation:slr 2.6s linear infinite} .ll{animation:sll 2.6s linear infinite}
+@keyframes fx{0%,4%{transform:scaleX(1);animation-timing-function:cubic-bezier(.65,0,.35,1)}20%,64%{transform:scaleX(-1);animation-timing-function:cubic-bezier(.65,0,.35,1)}80%,100%{transform:scaleX(1)}}
+@keyframes fy{0%,22%{transform:scaleY(1);animation-timing-function:cubic-bezier(.65,0,.35,1)}38%,46%{transform:scaleY(-1);animation-timing-function:cubic-bezier(.65,0,.35,1)}62%,100%{transform:scaleY(1)}}
+@keyframes sul{0%{fill:#2f6bff;stroke-opacity:0}4%{fill:#2f6bff;stroke-opacity:0.85}12.0%{fill:#1a3a94;stroke-opacity:0.85}20%{fill:#6f98ff;stroke-opacity:0.85}64%{fill:#6f98ff;stroke-opacity:0.85}72.0%{fill:#1a3a94;stroke-opacity:0.85}80%{fill:#2f6bff;stroke-opacity:0.85}100%{fill:#2f6bff;stroke-opacity:0}}
+@keyframes slr{0%{fill:#2f6bff;stroke-opacity:0}22%{fill:#2f6bff;stroke-opacity:0.85}30.0%{fill:#1a3a94;stroke-opacity:0.85}38%{fill:#6f98ff;stroke-opacity:0.85}46%{fill:#6f98ff;stroke-opacity:0.85}54.0%{fill:#1a3a94;stroke-opacity:0.85}62%{fill:#2f6bff;stroke-opacity:0.85}100%{fill:#2f6bff;stroke-opacity:0}}
+@keyframes sll{0%{fill:#2f6bff;stroke-opacity:0}4%{fill:#2f6bff;stroke-opacity:0.85}12.0%{fill:#1a3a94;stroke-opacity:0.85}20%{fill:#6f98ff;stroke-opacity:0.85}22%{fill:#6f98ff;stroke-opacity:0.85}30.0%{fill:#1a3a94;stroke-opacity:0.85}38%{fill:#2f6bff;stroke-opacity:0.85}46%{fill:#2f6bff;stroke-opacity:0.85}54.0%{fill:#1a3a94;stroke-opacity:0.85}62%{fill:#6f98ff;stroke-opacity:0.85}64%{fill:#6f98ff;stroke-opacity:0.85}72.0%{fill:#1a3a94;stroke-opacity:0.85}80%{fill:#2f6bff;stroke-opacity:0.85}100%{fill:#2f6bff;stroke-opacity:0}}
+@media (prefers-reduced-motion:reduce){.fx,.fy,.p{animation:none}}
+</style>
+<polygon class="p ur" points="51.80,7.68 85.00,38.60 85.00,60.20 51.80,30.60"/>
+<g class="fx"><polygon class="p ul" points="48.20,7.68 15.00,38.60 15.00,60.20 48.20,30.60"/></g>
+<g class="fy"><polygon class="p lr" points="84.36,62.00 51.80,62.00 51.80,92.32"/></g>
+<g class="fy"><g class="fx"><polygon class="p ll" points="15.64,62.00 48.20,62.00 48.20,92.32"/></g></g>
+</svg>

@@ -1,0 +1,12 @@
+// The VESPR look setter: writes only what the person has not set, keeps their own choices, and recognises the first-visit tabs.
+const assert = require('node:assert')
+const { planUpdates, isWelcomeTab, SETTINGS } = require('../lib/cleanse')
+const all = planUpdates(() => ({ globalValue: undefined })); assert.strictEqual(all.length, Object.keys(SETTINGS).length, 'a fresh profile gets everything')
+const keys = all.map(x => x[0]); for (const k of ['workbench.startupEditor', 'window.commandCenter', 'workbench.colorTheme', 'workbench.colorCustomizations']) assert.ok(keys.includes(k), k)
+const mine = planUpdates(k => ({ globalValue: k === 'workbench.colorTheme' ? 'Default Light Modern' : undefined })); assert.ok(!mine.some(x => x[0] === 'workbench.colorTheme'), 'the person\'s own theme is kept'); assert.strictEqual(mine.length, all.length - 1)
+assert.strictEqual(planUpdates(() => ({ globalValue: 'x' })).length, 0, 'nothing is overwritten once everything is set')
+assert.strictEqual(planUpdates(() => undefined).length, all.length, 'an unknown setting is written')
+for (const t of ['Welcome', 'Walkthrough: Setup VS Code Web', 'Get Started', '  welcome']) assert.ok(isWelcomeTab(t), t)
+for (const t of ['cart.py', 'Welcome.md', 'README.md', 'Getting started.py', '', undefined]) assert.ok(!isWelcomeTab(t), String(t))
+assert.strictEqual(SETTINGS['workbench.colorCustomizations']['focusBorder'], '#6c9dff')
+console.log('cleanse tests passed')

@@ -1,0 +1,51 @@
+/* The 30 renditions (app/renditions.js): every axis is an attribute on <html>, so the real app changes. The first value of each axis is today's look and needs no CSS:
+   btn=soft side=wallpaper top=full chat=gray comp=float density=comfy accent=agent. Loaded after frost.css; `html[...]` adds the weight to win over its id selectors. */
+
+/* ---- btn: the shape of buttons and controls */
+html[data-v-btn=pill] { --r-ctl:999px; --r-card:24px; }
+html[data-v-btn=square] { --r-ctl:2px; --r-card:4px; }
+html[data-v-btn=outline] { --r-ctl:8px; --r-card:14px; --glass-ctl:transparent; --glass-hair:var(--hair2); }
+html[data-v-btn=flat] { --r-ctl:8px; --glass-hair:transparent; --glass-ctl:rgb(255 255 255 / 10%); --glass-ctl-hover:rgb(255 255 255 / 17%); }
+html[data-theme=light][data-v-btn=flat] { --glass-ctl:rgb(0 0 0 / 6%); --glass-ctl-hover:rgb(0 0 0 / 11%); }
+html[data-v-btn=pill] :is(.btn, .quiet-pill, .fbtn, .cset-input, .pill-btn, #app .seg button, .cset-seg button, #app .sidebar .search) { border-radius:999px; }
+html[data-v-btn=square] :is(.btn, .quiet-pill, .fbtn, .cset-input, .pill-btn, #app .seg, #app .seg button, .cset-seg, .cset-seg button, #developerToolsBtn, #splitCodeBtn) { border-radius:2px; }
+html[data-v-btn=outline] :is(.btn, .quiet-pill, .fbtn) { background:transparent; border:1px solid var(--hair2); }
+html[data-v-btn=outline] #app .sidebar :is(.search, .workspace-nav button, .sidebar-extra summary, .home-action-row, .back-to-home-btn, .history-subwidget, #dashboardSlot) { -webkit-backdrop-filter:none; backdrop-filter:none; }
+html[data-v-btn=flat] :is(.btn, .quiet-pill, .fbtn) { border-color:transparent; background:var(--glass-ctl); }
+
+/* ---- side: the left sidebar */
+html[data-v-side=solid] #app .sidebar { background:var(--web-side) !important; box-shadow:inset -1px 0 0 var(--hair) !important; }
+html[data-v-side=tint] #app .sidebar { background:color-mix(in srgb, var(--agent-raw) 16%, var(--web-side)) !important; box-shadow:inset -1px 0 0 var(--hair) !important; }
+html[data-v-side=glass] body { background:radial-gradient(900px 600px at 0% 0%, color-mix(in srgb, var(--agent-raw) 55%, transparent), transparent 70%), radial-gradient(700px 500px at 0% 100%, color-mix(in srgb, var(--agent-raw) 30%, transparent), transparent 70%), var(--web-side); }
+html[data-v-side=glass] #app .sidebar { background:var(--frost) !important; -webkit-backdrop-filter:blur(28px) saturate(1.7); backdrop-filter:blur(28px) saturate(1.7); box-shadow:inset -1px 0 0 var(--frost-edge) !important; }
+html[data-v-side=blend] #app .sidebar { background:var(--chat-bg) !important; box-shadow:none !important; border-right:0 !important; }
+
+/* ---- top: the top bar */
+html[data-v-top=minimal] #app .topbar { background:transparent !important; border-bottom-color:transparent !important; box-shadow:none !important; }
+html[data-v-top=floating] #app .topbar { margin:7px 14px; height:auto; align-self:center; border-radius:var(--bar-r,14px); border:1px solid var(--frost-edge) !important; background:var(--sheen), var(--frost) !important; -webkit-backdrop-filter:blur(var(--frost-blur)) saturate(1.5); backdrop-filter:blur(var(--frost-blur)) saturate(1.5); box-shadow:var(--edge-hi), var(--lift); }
+
+/* ---- chat: the conversation surface */
+html[data-v-chat=black] { --chat-bg:#000; --chat-glass:#000; }
+html[data-theme=light][data-v-chat=black] { --chat-bg:#fff; --chat-glass:#fff; }
+html[data-v-chat=tinted] { --chat-bg:color-mix(in srgb, var(--agent-raw) 11%, #131316); --chat-glass:color-mix(in srgb, var(--agent-raw) 11%, #131316); }
+html[data-theme=light][data-v-chat=tinted] { --chat-bg:color-mix(in srgb, var(--agent-raw) 9%, #f4f4f7); --chat-glass:color-mix(in srgb, var(--agent-raw) 9%, #f4f4f7); }
+
+/* ---- comp: the message box */
+html[data-v-comp=docked] #app .comp { padding:0; }
+html[data-v-comp=docked] #app .box { max-width:none; border-radius:0; border-width:1px 0 0; box-shadow:none; background:var(--surface); -webkit-backdrop-filter:none; backdrop-filter:none; }
+html[data-v-comp=line] #app .box { background:transparent !important; -webkit-backdrop-filter:none; backdrop-filter:none; border-width:0 0 1px; border-radius:0; box-shadow:none !important; }
+
+/* ---- density */
+html[data-v-density=compact] #app .sidebar .row { min-height:32px; padding-top:3px; padding-bottom:3px; }
+html[data-v-density=compact] #app .sidebar .row .sub, html[data-v-density=compact] #app .sidebar .row small { display:none; }
+html[data-v-density=compact] .m { margin-top:6px; margin-bottom:6px; } html[data-v-density=compact] #app .chat { font-size:13px; }
+html[data-v-density=roomy] #app .sidebar .row { min-height:56px; padding-top:9px; padding-bottom:9px; }
+html[data-v-density=roomy] .m { margin-top:20px; margin-bottom:20px; } html[data-v-density=roomy] #app .chat { font-size:15px; line-height:1.65; }
+
+/* ---- accent: the highlight color (set with !important because the agent's color is written as an inline style) */
+html[data-v-accent=mono] { --agent:#e6e6ea !important; --agent-raw:#7d7d88 !important; --agent-bg:rgb(255 255 255 / 10%) !important; }
+html[data-theme=light][data-v-accent=mono] { --agent:#2a2a30 !important; --agent-raw:#7d7d88 !important; --agent-bg:rgb(0 0 0 / 8%) !important; }
+html[data-v-accent=amber] { --agent:#f5a94c !important; --agent-raw:#f5a94c !important; --agent-bg:rgb(245 169 76 / 16%) !important; }
+html[data-theme=light][data-v-accent=amber] { --agent:#b45309 !important; --agent-raw:#f5a94c !important; --agent-bg:rgb(245 169 76 / 18%) !important; }
+html[data-v-accent=teal] { --agent:#34d3a4 !important; --agent-raw:#34d3a4 !important; --agent-bg:rgb(52 211 164 / 16%) !important; }
+html[data-theme=light][data-v-accent=teal] { --agent:#0f766e !important; --agent-raw:#34d3a4 !important; --agent-bg:rgb(52 211 164 / 18%) !important; }

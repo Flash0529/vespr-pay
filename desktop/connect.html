@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><title>VESPR: connect</title>
+<style>
+  :root { color-scheme: light dark; } body { font: 15px system-ui, sans-serif; max-width: 560px; margin: 8vh auto; padding: 0 20px; }
+  h1 { font-size: 22px; } label { display: block; margin: 14px 0 4px; font-weight: 600; font-size: 13px; } input { width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px; }
+  small { opacity: .7; } button { margin-top: 20px; padding: 9px 18px; font-size: 14px; }
+</style></head><body>
+<h1>Connect to your VESPR workspace</h1>
+<label>Your workspace address (the SDE link, with your key)</label><input id="ide" placeholder="https://ide-yourname.example.com/?tkn=...&folder=/workspace">
+<label>Realtime server</label><input id="server" placeholder="wss://collab.example.com">
+<label>Your VESPR token</label><input id="token" type="password"><small>Stored on this computer only, in a file only you can read.</small>
+<label>Name for this computer</label><input id="label">
+<button id="go">Save and open</button>
+<script>
+  murmio.get().then(c => { ide.value = c.ideUrl; server.value = c.server; token.value = c.token; label.value = c.label })
+  go.onclick = () => murmio.save({ ideUrl: ide.value.trim(), server: server.value.trim(), token: token.value.trim(), label: label.value.trim() })
+</script></body></html>

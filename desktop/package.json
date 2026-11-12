@@ -1,0 +1,130 @@
+{
+  "name": "murmio-desktop",
+  "productName": "VESPR",
+  "version": "0.0.1",
+  "description": "VESPR for macOS, Windows and Linux: the shared workspace plus this computer as a runner (optional).",
+  "main": "main.js",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "start": "npm run web && electron .",
+    "test": "node --test test/open.test.js test/runner-parity.test.js test/security.test.js test/appearance.test.js",
+    "dist": "npm run web && electron-builder",
+    "web": "node tools/copy-web.js",
+    "dist:store": "npm run web && electron-builder --win appx",
+    "dist:exe": "npm run web && electron-builder --win nsis",
+    "dist:mac": "npm run web && electron-builder --mac dmg zip --arm64"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "world.murmio.desktop",
+    "productName": "VESPR",
+    "files": [
+      "main.js",
+      "open.js",
+      "security.js",
+      "appearance.js",
+      "preload.js",
+      "connect.html",
+      "defaults.json",
+      "runner/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "build/icon.png",
+      "web/**/*"
+    ],
+    "protocols": [
+      {
+        "name": "VESPR Protocol",
+        "schemes": [
+          "vespr"
+        ]
+      }
+    ],
+    "fileAssociations": [
+      {
+        "ext": "py",
+        "name": "Python File",
+        "role": "Editor"
+      },
+      {
+        "ext": "js",
+        "name": "JavaScript File",
+        "role": "Editor"
+      },
+      {
+        "ext": "ts",
+        "name": "TypeScript File",
+        "role": "Editor"
+      },
+      {
+        "ext": "json",
+        "name": "JSON File",
+        "role": "Editor"
+      },
+      {
+        "ext": "md",
+        "name": "Markdown Document",
+        "role": "Editor"
+      },
+      {
+        "ext": "html",
+        "name": "HTML Document",
+        "role": "Editor"
+      },
+      {
+        "ext": "css",
+        "name": "CSS Stylesheet",
+        "role": "Editor"
+      }
+    ],
+    "extraMetadata": {
+      "main": "main.js"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.developer-tools",
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "icon": "build/icons",
+      "synopsis": "People and AI agents in the same files"
+    },
+    "appx": {
+      "identityName": "VESPR.Desktop",
+      "publisher": "CN=VESPR-PLACEHOLDER",
+      "publisherDisplayName": "VESPR",
+      "applicationId": "VESPR",
+      "displayName": "VESPR",
+      "backgroundColor": "#131314",
+      "languages": [
+        "en-US"
+      ],
+      "showNameOnTiles": false
+    }
+  },
+  "author": "VESPR contributors",
+  "engines": {
+    "node": ">=20 <25"
+  }
+}

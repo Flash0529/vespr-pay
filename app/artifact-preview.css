@@ -1,0 +1,35 @@
+.artifact-preview {
+  width: min(1100px, calc(100vw - 32px));
+  height: min(760px, calc(100dvh - 32px));
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--hair2, #d8dbe3);
+  border-radius: 12px;
+  background: var(--surface, #fff);
+  color: var(--text, #171a22);
+  font: 14px/1.45 var(--font, system-ui, sans-serif);
+  overflow: hidden;
+}
+.artifact-preview[open] { display: flex; flex-direction: column; }
+.artifact-preview::backdrop { background: rgb(0 0 0 / 50%); }
+.artifact-preview-header { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-bottom: 1px solid var(--hair2, #d8dbe3); flex: 0 0 auto; }
+.artifact-preview-titles { min-width: 0; flex: 1; }
+.artifact-preview-label { display: block; color: var(--muted, #5f6572); font-size: 12px; }
+.artifact-preview-title { margin: 2px 0 0; font-size: 15px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.artifact-preview-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.artifact-preview-actions button { min-height: 36px; border: 1px solid var(--hair2, #d8dbe3); border-radius: 7px; background: var(--surface2, #f3f4f7); color: inherit; font: inherit; cursor: pointer; }
+.artifact-preview-source { padding: 6px 12px; }
+.artifact-preview-actions .artifact-preview-close { width: 36px; padding: 0; font-size: 23px; line-height: 1; }
+.artifact-preview-actions button:hover { background: var(--agent-bg, #eaf0ff); }
+.artifact-preview-actions button:focus-visible { outline: 2px solid var(--agent, #245ac9); outline-offset: 2px; }
+.artifact-preview-stage { flex: 1; min-height: 0; background: #fff; }
+.artifact-preview-stage iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.artifact-preview-note { flex: 0 0 auto; margin: 0; padding: 10px 18px; border-top: 1px solid var(--hair2, #d8dbe3); color: var(--muted, #5f6572); font-size: 12px; }
+@media (max-width: 520px) {
+  .artifact-preview { width: calc(100vw - 16px); height: calc(100dvh - 16px); border-radius: 9px; }
+  .artifact-preview-header { gap: 8px; padding: 12px; }
+  .artifact-preview-actions { gap: 6px; }
+  .artifact-preview-actions .artifact-preview-source { padding: 6px 9px; font-size: 12px; }
+  .artifact-preview-note { padding: 9px 12px; }
+}

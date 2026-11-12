@@ -1,0 +1,10 @@
+{
+  " version\: \1.0.6-live\,
+ \build\: 1045,
+ \commit\: \fa5f7a4\,
+ \timestamp\: \2026-11-05T12:15:22Z\,
+ \channel\: \pi-direct\,
+ \deviceTarget\: \windows-x64\,
+ \hotReloadAvailable\: true,
+ \services\: [\sde\, \smart-roles\, \enterprise-sync\, \message-queue\, \autonomous-workers\, \recurring-chats\, \agentic-coding-bar\]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "murmio-runner",
+  "version": "0.0.1",
+  "description": "Runs commands for a VESPR workspace on this machine. Connects out to the VESPR server; no open ports.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "bin": {
+    "murmio-runner": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

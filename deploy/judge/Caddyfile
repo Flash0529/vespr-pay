@@ -1,0 +1,84 @@
+# Cloudflare is in front of vespr.online, so every connection comes from a Cloudflare address. Only when it does is its
+# CF-Connecting-IP header believed (ranges from https://www.cloudflare.com/ips-v4 and ips-v6, fetched 2026-11-07); every
+# proxy to the realtime server then sends that one address as X-Forwarded-For, so the per-address limits (sign-up tries,
+# SMS codes, requests a minute) count each visitor, not a whole Cloudflare region. Anyone else's header is ignored.
+{
+	servers {
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		client_ip_headers CF-Connecting-IP
+	}
+}
+# Automatic HTTPS for each name (Let's Encrypt). WebSockets (realtime server, SDE) pass through unchanged.
+collab.{$DOMAIN} {
+	encode gzip
+	reverse_proxy collab:8241 {
+		header_up X-Forwarded-For {client_ip}
+	}
+}
+judge1.{$DOMAIN} {
+	reverse_proxy ide-judge1:3000
+}
+judge2.{$DOMAIN} {
+	reverse_proxy ide-judge2:3000
+}
+# the VESPR app shell (static files from repo/app). Notes and backups are never served. The token goes in the URL fragment (#token=...), which is never sent to any server.
+app.{$DOMAIN} {
+	encode gzip
+	root * /srv/app
+	@private path *.md *.bak* /vespr-client.js.bak*
+	respond @private 404
+	rewrite / /prototype.html
+	header {
+		Cache-Control "no-store"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+	file_server
+}
+# the VESPR website (static files from repo/site, built from site-v2). Notes and design sources are never served.
+{$DOMAIN}, www.{$DOMAIN} {
+	encode gzip zstd
+	root * /srv/site
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+	# accounts, access lists and the live workspace go to the realtime server; the app at /app/ talks to its own address
+	handle /auth/* {
+		reverse_proxy collab:8241 {
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+	handle /api/* {
+		reverse_proxy collab:8241 {
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+	handle /ws/* {
+		reverse_proxy collab:8241 {
+			header_up X-Forwarded-For {client_ip}
+		}
+	}
+	redir /app /app/
+	handle_path /app/* {
+		root * /srv/app
+		@appprivate path *.md *.bak*
+		respond @appprivate 404
+		rewrite / /prototype.html
+		header Cache-Control "no-store"
+		file_server
+	}
+	handle {
+		@private path *.md *.bak* /design-system/* /tools/* /legal/NOTES.md
+		respond @private 404
+		@assets path /css/* /js/* /fonts/* /assets/*
+		header @assets Cache-Control "public, max-age=3600"
+		file_server
+	}
+	handle_errors {
+		@notfound expression {err.status_code} == 404
+		rewrite @notfound /404.html
+		file_server
+	}
+}

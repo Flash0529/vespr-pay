@@ -1,0 +1,278 @@
+{
+  "name": "murmio-collab",
+  "displayName": "VESPR",
+  "description": "Live multiplayer editing with people and AI agents: shared cursors, presence, shared agent chat.",
+  "version": "0.0.1",
+  "publisher": "murmio",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onView:murmio.chat"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "murmio.people",
+        "title": "VESPR: Who is here"
+      },
+      {
+        "command": "murmio.follow",
+        "title": "VESPR: Follow a collaborator"
+      },
+      {
+        "command": "murmio.reconnect",
+        "title": "VESPR: Reconnect"
+      },
+      {
+        "command": "murmio.chat",
+        "title": "VESPR: Open team chat"
+      },
+      {
+        "command": "murmio.lens",
+        "title": "VESPR: Toggle authorship lens (who wrote what)"
+      },
+      {
+        "command": "murmio.replay",
+        "title": "VESPR: Replay this session"
+      },
+      {
+        "command": "murmio.commit",
+        "title": "VESPR: Commit workspace to git"
+      },
+      {
+        "command": "murmio.welcome",
+        "title": "VESPR: Welcome and walkthrough"
+      },
+      {
+        "command": "murmio.codemap",
+        "title": "VESPR: Show code map"
+      },
+      {
+        "command": "murmio.approve",
+        "title": "VESPR: Approve the agent's request"
+      },
+      {
+        "command": "murmio.deny",
+        "title": "VESPR: Deny the agent's request"
+      },
+      {
+        "command": "murmio.say",
+        "title": "VESPR: Say something in the team chat"
+      },
+      {
+        "command": "murmio.askAgent",
+        "title": "VESPR: Ask the agent"
+      },
+      {
+        "command": "murmio.runIt",
+        "title": "VESPR: Run it (start the project and preview)"
+      },
+      {
+        "command": "murmio.mode",
+        "title": "VESPR: Set the agent mode"
+      },
+      {
+        "command": "murmio.catchUp",
+        "title": "VESPR: Catch me up"
+      }
+    ],
+    "configuration": {
+      "title": "VESPR",
+      "properties": {
+        "murmio.server": {
+          "type": "string",
+          "default": "ws://127.0.0.1:8241",
+          "description": "VESPR realtime server (WebSocket URL)."
+        },
+        "murmio.room": {
+          "type": "string",
+          "default": "demo",
+          "description": "Workspace room name (lowercase letters, digits, dashes)."
+        },
+        "murmio.token": {
+          "type": "string",
+          "default": "",
+          "description": "Your access token."
+        },
+        "murmio.userName": {
+          "type": "string",
+          "default": "",
+          "description": "Name shown next to your cursor."
+        },
+        "murmio.suggestions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline suggestions (ghost text, Tab to accept) that also use what teammates and agents just did."
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "murmio",
+          "title": "VESPR",
+          "icon": "media/murmio.svg"
+        }
+      ]
+    },
+    "views": {
+      "murmio": [
+        {
+          "type": "webview",
+          "id": "murmio.chat",
+          "name": "Team chat"
+        }
+      ]
+    },
+    "walkthroughs": [
+      {
+        "id": "murmio.welcome",
+        "title": "Get started with VESPR",
+        "description": "Work with your team and AI agents in the same files, at the same time.",
+        "steps": [
+          {
+            "id": "chat",
+            "title": "Talk to the team and the agents",
+            "description": "Open the VESPR panel and mention an agent with @coder.\n[Open team chat](command:murmio.chat)",
+            "media": {
+              "markdown": "media/walkthrough/chat.md"
+            }
+          },
+          {
+            "id": "modes",
+            "title": "The team decides what agents may do",
+            "description": "Manual, Accept edits, Auto, Plan or Bypass, with Approve / Deny cards everyone sees.",
+            "media": {
+              "markdown": "media/walkthrough/modes.md"
+            }
+          },
+          {
+            "id": "authorship",
+            "title": "Who wrote this, and why?",
+            "description": "Hover a line, or tint the file by author.\n[Toggle authorship lens](command:murmio.lens)",
+            "media": {
+              "markdown": "media/walkthrough/authorship.md"
+            }
+          },
+          {
+            "id": "replay",
+            "title": "Rewind the session",
+            "description": "Replay edits, cursors, chat and approvals.\n[Open replay](command:murmio.replay)",
+            "media": {
+              "markdown": "media/walkthrough/replay.md"
+            }
+          },
+          {
+            "id": "runners",
+            "title": "Run commands anywhere",
+            "description": "Sandbox, cloud, or a teammate's computer.",
+            "media": {
+              "markdown": "media/walkthrough/runners.md"
+            }
+          },
+          {
+            "id": "git",
+            "title": "Your code, hosted",
+            "description": "Commit, clone, pull and push with ordinary git.\n[Commit workspace](command:murmio.commit)",
+            "media": {
+              "markdown": "media/walkthrough/git.md"
+            }
+          }
+        ]
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "murmio.chat",
+        "key": "ctrl+alt+m c",
+        "mac": "cmd+alt+m c"
+      },
+      {
+        "command": "murmio.codemap",
+        "key": "ctrl+alt+m m",
+        "mac": "cmd+alt+m m"
+      },
+      {
+        "command": "murmio.replay",
+        "key": "ctrl+alt+m r",
+        "mac": "cmd+alt+m r"
+      },
+      {
+        "command": "murmio.lens",
+        "key": "ctrl+alt+m l",
+        "mac": "cmd+alt+m l"
+      },
+      {
+        "command": "murmio.commit",
+        "key": "ctrl+alt+m g",
+        "mac": "cmd+alt+m g"
+      },
+      {
+        "command": "murmio.people",
+        "key": "ctrl+alt+m p",
+        "mac": "cmd+alt+m p"
+      },
+      {
+        "command": "murmio.follow",
+        "key": "ctrl+alt+m f",
+        "mac": "cmd+alt+m f"
+      },
+      {
+        "command": "murmio.approve",
+        "key": "ctrl+alt+m a",
+        "mac": "cmd+alt+m a"
+      },
+      {
+        "command": "murmio.deny",
+        "key": "ctrl+alt+m d",
+        "mac": "cmd+alt+m d"
+      },
+      {
+        "command": "murmio.runIt",
+        "key": "ctrl+alt+m u",
+        "mac": "cmd+alt+m u"
+      },
+      {
+        "command": "murmio.askAgent",
+        "key": "ctrl+alt+m k",
+        "mac": "cmd+alt+m k"
+      },
+      {
+        "command": "murmio.mode",
+        "key": "ctrl+alt+m s",
+        "mac": "cmd+alt+m s"
+      },
+      {
+        "command": "murmio.catchUp",
+        "key": "ctrl+alt+m w",
+        "mac": "cmd+alt+m w"
+      },
+      {
+        "command": "murmio.say",
+        "key": "ctrl+alt+m t",
+        "mac": "cmd+alt+m t"
+      }
+    ]
+  },
+  "dependencies": {
+    "lib0": "^0.2.99",
+    "ws": "^8.18.0",
+    "y-protocols": "^1.0.6",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.0"
+  },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "icon": "media/icon.png",
+  "categories": [
+    "Other"
+  ]
+}

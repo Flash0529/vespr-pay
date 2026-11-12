@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vespr.Core", "Vespr.Core\Vespr.Core.csproj", "{FB3A861B-D946-46EA-95EE-9D937BA67B5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vespr.Core.Tests", "Vespr.Core.Tests\Vespr.Core.Tests.csproj", "{1795DA2C-6B86-475C-8F8F-7FA45A87EAFC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FB3A861B-D946-46EA-95EE-9D937BA67B5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB3A861B-D946-46EA-95EE-9D937BA67B5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB3A861B-D946-46EA-95EE-9D937BA67B5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB3A861B-D946-46EA-95EE-9D937BA67B5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1795DA2C-6B86-475C-8F8F-7FA45A87EAFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1795DA2C-6B86-475C-8F8F-7FA45A87EAFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1795DA2C-6B86-475C-8F8F-7FA45A87EAFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1795DA2C-6B86-475C-8F8F-7FA45A87EAFC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
